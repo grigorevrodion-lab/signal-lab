@@ -162,13 +162,13 @@ export class ScenarioService {
       data: {
         type: dto.type,
         name: dto.name,
-        status: 'completed',
+        status: 'teapot',
         duration,
         metadata: { easter: true },
       },
     });
 
-    this.recordMetrics(dto.type, 'completed', duration);
+    this.recordMetrics(dto.type, 'teapot', duration);
     logger.info({ scenarioType: dto.type, duration, easter: true, msg: 'Teapot scenario triggered' });
 
     throw new HttpException(

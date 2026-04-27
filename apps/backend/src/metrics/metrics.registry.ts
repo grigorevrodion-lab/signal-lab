@@ -1,6 +1,7 @@
-import { Counter, Histogram, Registry } from 'prom-client';
+import { Counter, Histogram, Registry, collectDefaultMetrics } from 'prom-client';
 
 export const registry = new Registry();
+collectDefaultMetrics({ register: registry });
 
 export const scenarioRunsTotal = new Counter({
   name: 'scenario_runs_total',

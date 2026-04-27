@@ -10,7 +10,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   const data: unknown = await res.json().catch(() => null);
 
-  if (!res.ok) {
+  // 418 is a special "success" (teapot easter egg) — return body, don't throw
+  if (!res.ok && res.status !== 418) {
     const message =
       (data as { message?: string })?.message ?? `HTTP ${res.status}`;
     throw new Error(message);
