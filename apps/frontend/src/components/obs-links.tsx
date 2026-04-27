@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { ExternalLink, BarChart3, FileText, AlertTriangle, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -5,7 +6,7 @@ interface ObsLink {
   label: string;
   url: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
 }
 
 const LINKS: ObsLink[] = [
