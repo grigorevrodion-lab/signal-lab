@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostEdit": [
+      {
+        "name": "schema-change-reminder",
+        "pattern": "apps/backend/prisma/schema.prisma",
+        "command": "echo '\\n⚠️  Prisma schema changed. Run: npx prisma migrate dev --name <description> && npx prisma generate\\nThen restart the backend container.'"
+      },
+      {
+        "name": "new-endpoint-obs-check",
+        "pattern": "apps/backend/src/**/*.controller.ts",
+        "command": "echo '\\n📊  New/modified controller detected. Run /check-obs to verify metrics, logging, and Sentry are wired.'"
+      }
+    ],
+    "PreCommit": [
+      {
+        "name": "no-hardcoded-secrets",
+        "command": "grep -rn 'SENTRY_DSN\\s*=\\s*[\"\\x27]https' apps/ --include='*.ts' && echo '❌ Hardcoded Sentry DSN found — use env variable!' || true"
+      },
+      {
+        "name": "no-console-log",
+        "command": "grep -rn 'console\\.log' apps/backend/src/ --include='*.ts' && echo '❌ console.log found in backend — use pino logger!' || true"
+      }
+    ]
+  }
+}

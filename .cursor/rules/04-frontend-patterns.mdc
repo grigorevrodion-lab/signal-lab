@@ -1,0 +1,43 @@
+---
+description: Frontend patterns — TanStack Query, RHF, shadcn/ui conventions
+globs: ["apps/frontend/src/**/*.tsx", "apps/frontend/src/**/*.ts"]
+alwaysApply: true
+---
+
+# Frontend Patterns
+
+## Data fetching (TanStack Query)
+- All API calls go through `src/lib/api.ts` — never fetch inside components
+- Use `useQuery` for reads, `useMutation` for writes
+- Always provide `queryKey` as `['resource', id?]` tuple
+- Invalidate related queries after mutations:
+  ```typescript
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['runs'] })
+  ```
+- Use `refetchInterval` for polling, NOT `setInterval`
+- Never store server data in `useState` — that defeats the purpose of TanStack Query
+
+## Forms (React Hook Form + Zod)
+- Every form has a Zod schema at the top of the file
+- Use `zodResolver` from `@hookform/resolvers/zod`
+- Submit handler only calls mutation, no direct fetch
+- Show loading state on the submit button (`isPending` from `useMutation`)
+- Display field errors from `formState.errors`
+
+```typescript
+const schema = z.object({ type: z.enum([...]), name: z.string().optional() });
+const { register, handleSubmit } = useForm({ resolver: zodResolver(schema) });
+```
+
+## UI Components (shadcn/ui)
+- Import from `@/components/ui/*` — never copy-paste Tailwind inline for shadcn primitives
+- Use `Badge` for status indicators — variant maps to color
+- Use `Card` + `CardHeader` + `CardContent` for panel layout
+- Use `toast` from `sonner` for notifications — never `alert()`
+- All interactive elements have `disabled` state during loading
+
+## Component conventions
+- 'use client' only when using hooks, event handlers, or browser APIs
+- Prefer Server Components for static content
+- Export named functions, not `export default` anonymous arrows
+- Loading states: show skeleton placeholders, not "Loading..." text

@@ -1,0 +1,45 @@
+---
+description: Prisma ORM patterns — what to do and what is forbidden
+globs: ["apps/backend/src/**/*.ts", "apps/backend/prisma/**"]
+alwaysApply: true
+---
+
+# Prisma Patterns
+
+## Usage rules
+- Inject `PrismaService` via constructor DI — never import `PrismaClient` directly in services
+- Use `PrismaService` which extends `PrismaClient` and handles connect/disconnect lifecycle
+- All DB calls must be `await`ed — no fire-and-forget DB writes
+
+## Schema conventions
+- All models have `id String @id @default(cuid())` — no auto-increment integers
+- All models have `createdAt DateTime @default(now())`
+- Add `@@index` for fields used in `where` or `orderBy` clauses
+- Use `Json?` for flexible metadata — never store JSON as a string
+- Use `String` for enum-like fields (scenario type, status) — simpler than Prisma enums for this domain
+
+## Forbidden
+- `$queryRaw` / `$executeRaw` — use Prisma client API only
+- Multiple `PrismaClient` instances — use the singleton `PrismaService`
+- Storing passwords/tokens in the database as plaintext
+- Omitting `migrate deploy` in production startup
+
+## After schema changes
+Run in order:
+```bash
+npx prisma migrate dev --name <description>   # creates migration
+npx prisma generate                            # regenerates client
+```
+Restart the backend container after migration.
+
+## Example service pattern
+```typescript
+@Injectable()
+export class FooService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findById(id: string): Promise<Foo> {
+    return this.prisma.foo.findUniqueOrThrow({ where: { id } });
+  }
+}
+```

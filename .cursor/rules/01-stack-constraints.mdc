@@ -1,0 +1,32 @@
+---
+description: Enforced tech stack — allowed and forbidden libraries
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# Stack Constraints
+
+## Backend (NestJS)
+- Framework: **NestJS only** — no Express without NestJS, no Fastify, no Koa
+- ORM: **Prisma only** — no TypeORM, no Sequelize, no raw SQL strings
+- Validation: **class-validator + class-transformer** — no Joi, no Zod on backend
+- HTTP client: native fetch or axios — no got, no node-fetch
+- Logging: **pino** — no winston, no console.log in production code
+- Metrics: **prom-client** — no other metrics libraries
+- Error tracking: **@sentry/node** — no other error tracking
+- Testing: **Jest** — no Vitest on backend
+
+## Frontend (Next.js)
+- Framework: **Next.js App Router** — no Pages Router patterns, no Remix
+- Server state: **TanStack Query** — no SWR, no Redux Toolkit Query, no React Query v3
+- Forms: **React Hook Form + Zod** — no Formik, no controlled forms with useState
+- UI components: **shadcn/ui** — no MUI, no Chakra, no Ant Design
+- Styling: **Tailwind CSS** — no CSS modules, no styled-components, no emotion
+- State management: none needed — if needed, use Zustand, NOT Redux
+
+## Forbidden patterns
+- No `any` type — use proper TypeScript types
+- No `console.log` — use pino logger on backend
+- No raw SQL — use Prisma client
+- No hardcoded ports or URLs — use environment variables
+- No `useState` for server state — use TanStack Query

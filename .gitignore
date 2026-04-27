@@ -1,0 +1,13 @@
+node_modules/
+.env
+dist/
+.next/
+.execution/
+*.log
+
+# Prisma
+apps/backend/node_modules/.prisma/
+
+# OS
+.DS_Store
+Thumbs.db

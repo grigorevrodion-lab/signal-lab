@@ -1,0 +1,42 @@
+---
+description: Naming conventions for metrics, log format, and Sentry usage
+globs: ["apps/backend/src/**/*.ts"]
+alwaysApply: true
+---
+
+# Observability Conventions
+
+## Metric Naming (Prometheus)
+- Use `snake_case` with unit suffix: `_total`, `_seconds`, `_bytes`
+- Counters end in `_total`: `scenario_runs_total`, `http_requests_total`
+- Histograms end in `_seconds` or `_bytes`: `scenario_run_duration_seconds`
+- Labels: lowercase snake_case — `status_code`, `scenario_type`, NOT `statusCode`
+- Register all metrics in `src/metrics/metrics.registry.ts` — never create inline
+
+## Structured Logging (pino)
+Every log entry MUST include:
+```typescript
+logger.info({
+  msg: 'Human-readable description',     // required
+  scenarioType: dto.type,                // domain context
+  scenarioId: run.id,                    // entity id when available
+  duration: durationMs,                  // timing in ms
+  // err: error,                         // add for warn/error levels
+});
+```
+- Use `logger.info` for successful operations
+- Use `logger.warn` for expected degradation (slow requests, validation errors)
+- Use `logger.error` for unhandled exceptions (always include `err` field)
+- NEVER log sensitive data (tokens, passwords, PII)
+
+## Sentry
+- Call `Sentry.captureException(error)` in every `catch` block for system errors
+- Call `Sentry.addBreadcrumb()` for non-fatal events (validation errors)
+- Always add context: `{ tags: { scenarioType }, extra: { duration } }`
+- Initialize once in `main.ts`, check `process.env.SENTRY_DSN` exists first
+
+## When adding a new endpoint
+1. Add metric increment after each business operation
+2. Add pino log at the start (debug) and end (info/warn/error)
+3. Add Sentry capture in error path
+4. Expose new metric labels in Prometheus scrape
