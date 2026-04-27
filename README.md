@@ -1,144 +1,145 @@
 # Signal Lab
 
-Observability playground — click a button in the UI, see the result in Grafana, Loki, and Sentry within 30 seconds.
+Площадка для наблюдаемости: нажми кнопку в интерфейсе — увидь результат в Grafana, Loki и Sentry в течение 30 секунд.
 
-## Prerequisites
+## Требования
 
-- Docker Desktop 4.x+ with Compose v2
+- Docker Desktop 4.x+ с Compose v2
 - Git
 
-## Quick Start
+## Быстрый старт
 
 ```bash
 git clone <repo-url> signal-lab && cd signal-lab
 
 cp .env.example .env
-# Optional: add SENTRY_DSN=https://... to .env for Sentry captures
+# Опционально: добавь SENTRY_DSN=https://... в .env для захвата событий Sentry
 
 docker compose up -d
 ```
 
-Wait ~30 seconds for all services to become healthy, then:
+Подожди ~30 секунд, пока все сервисы станут здоровыми, затем:
 
-| Service | URL |
-|---------|-----|
+| Сервис | URL |
+|--------|-----|
 | UI | http://localhost:3000 |
 | API + Swagger | http://localhost:3001/api/docs |
-| Prometheus metrics | http://localhost:3001/metrics |
+| Метрики Prometheus | http://localhost:3001/metrics |
 | Grafana | http://localhost:3100 (admin / admin) |
-| Loki (via Grafana) | http://localhost:3100/explore |
+| Loki (через Grafana) | http://localhost:3100/explore |
 | Prometheus UI | http://localhost:9090 |
 
-## Stop
+## Остановка
 
 ```bash
 docker compose down
-# Remove volumes (clears all data):
+# Удалить тома (очищает все данные):
 docker compose down -v
 ```
 
 ---
 
-## Verification Walkthrough
+## Проверка работоспособности
 
-Complete this in 5 minutes to verify everything works.
+Выполни за 5 минут, чтобы убедиться, что всё работает.
 
-### 1. UI loads
-Open http://localhost:3000 — you should see the "Signal Lab" header, a "Run Scenario" form, and empty "Run History".
+### 1. UI загружается
 
-### 2. Run scenarios
+Открой http://localhost:3000 — должен появиться заголовок "Signal Lab", форма "Run Scenario" и пустой "Run History".
 
-In the UI, run each of these and observe the badge color in Run History:
+### 2. Запуск сценариев
 
-| Scenario | Expected badge | Expected toast |
-|----------|---------------|----------------|
-| `success` | Green "OK" | "Run completed in Xms" |
-| `validation_error` | Yellow "Invalid" | "Run failed" + 400 message |
-| `system_error` | Red "Error" | "Run failed" + 500 message |
-| `slow_request` | Green "OK" after 2–5s | "Run completed in Xs" |
-| `teapot` | Cyan "418" | "Teapot! Signal: 42" |
+В UI запусти каждый из них и наблюдай за цветом бейджа в истории:
 
-### 3. Verify Prometheus metrics
+| Сценарий | Ожидаемый бейдж | Ожидаемый тост |
+|----------|----------------|----------------|
+| `success` | Зелёный "OK" | "Run completed in Xms" |
+| `validation_error` | Жёлтый "Invalid" | "Run failed" + сообщение 400 |
+| `system_error` | Красный "Error" | "Run failed" + сообщение 500 |
+| `slow_request` | Зелёный "OK" через 2-5с | "Run completed in Xs" |
+| `teapot` | Голубой "418" | "Teapot! Signal: 42" |
+
+### 3. Проверка метрик Prometheus
 
 ```
 open http://localhost:3001/metrics
 ```
 
-Search for:
-- `scenario_runs_total` — should show counts with `type` and `status` labels
-- `scenario_run_duration_seconds_count` — histogram counts
-- `http_requests_total` — HTTP request counts
+Найди:
+- `scenario_runs_total` — счётчики с метками `type` и `status`
+- `scenario_run_duration_seconds_count` — счётчики гистограммы
+- `http_requests_total` — счётчики HTTP-запросов
 
-### 4. Verify Grafana dashboard
+### 4. Проверка дашборда Grafana
 
-Open http://localhost:3100 → login with `admin / admin`
+Открой http://localhost:3100 → войди как `admin / admin`
 
-Go to **Dashboards → Signal Lab → Signal Lab**.
+Перейди в **Dashboards → Signal Lab → Signal Lab**.
 
-You should see 5 panels:
-- "Scenario Runs by Type" — time series with colored lines per scenario type
-- "Error Rate" — time series, red line for `failed` status
-- "Latency Distribution (P50 / P95 / P99)" — after `slow_request`, p99 spikes to 5s
-- "HTTP Requests Total" — all API calls
-- "Application Logs (Loki)" — JSON log entries from the backend
+Должно быть 5 панелей:
+- "Scenario Runs by Type" — временные ряды с цветными линиями по типам сценариев
+- "Error Rate" — временные ряды, красная линия для статуса `failed`
+- "Latency Distribution (P50 / P95 / P99)" — после `slow_request` p99 поднимается до 5с
+- "HTTP Requests Total" — все вызовы API
+- "Application Logs (Loki)" — JSON-записи логов из бэкенда
 
-### 5. Verify Loki logs
+### 5. Проверка логов Loki
 
-In Grafana: **Explore → datasource: Loki**
+В Grafana: **Explore → datasource: Loki**
 
-Run query: `{app="signal-lab"}`
+Выполни запрос: `{app="signal-lab"}`
 
-You should see structured JSON logs with fields: `level`, `msg`, `scenarioType`, `scenarioId`, `duration`.
+Должны появиться структурированные JSON-логи с полями: `level`, `msg`, `scenarioType`, `scenarioId`, `duration`.
 
-Filter by scenario type: `{app="signal-lab"} | json | scenarioType="system_error"`
+Фильтр по типу сценария: `{app="signal-lab"} | json | scenarioType="system_error"`
 
-### 6. Verify Sentry (requires DSN)
+### 6. Проверка Sentry (требует DSN)
 
-If `SENTRY_DSN` is set in `.env`:
-- Run `system_error` scenario
-- Open your Sentry project — a new exception `Unhandled system exception in scenario execution` should appear within 30s
+Если `SENTRY_DSN` указан в `.env`:
+- Запусти сценарий `system_error`
+- Открой проект Sentry — новое исключение `Unhandled system exception in scenario execution` должно появиться в течение 30с
 
 ---
 
-## Architecture
+## Архитектура
 
 ```
-localhost:3000  →  Next.js frontend (shadcn/ui, TanStack Query, RHF)
-localhost:3001  →  NestJS backend (Prisma/PG, prom-client, pino, Sentry)
-localhost:9090  →  Prometheus (scrapes backend /metrics every 5s)
-localhost:3100  →  Grafana (dashboards: Prometheus + Loki datasources)
-localhost:3200  →  Loki (receives logs from Promtail)
-                   Promtail (reads Docker container logs → Loki)
-                   PostgreSQL (stores ScenarioRun records)
+localhost:3000  →  Next.js фронтенд (shadcn/ui, TanStack Query, RHF)
+localhost:3001  →  NestJS бэкенд (Prisma/PG, prom-client, pino, Sentry)
+localhost:9090  →  Prometheus (опрашивает бэкенд /metrics каждые 5с)
+localhost:3100  →  Grafana (дашборды: источники данных Prometheus + Loki)
+localhost:3200  →  Loki (получает логи от Promtail)
+                   Promtail (читает логи Docker-контейнеров → Loki)
+                   PostgreSQL (хранит записи ScenarioRun)
 ```
 
-## Scenario Types
+## Типы сценариев
 
-| Type | HTTP status | Signal |
-|------|------------|--------|
-| `success` | 200 | metric++, log info, PG row |
-| `validation_error` | 400 | metric++, log warn, Sentry breadcrumb |
-| `system_error` | 500 | metric++, log error, Sentry exception |
-| `slow_request` | 200 (after 2–5s) | metric++, histogram spike, log warn |
-| `teapot` | 418 🫖 | signal: 42, easter egg metadata |
+| Тип | HTTP-статус | Сигнал |
+|-----|------------|--------|
+| `success` | 200 | metric++, лог info, строка в PG |
+| `validation_error` | 400 | metric++, лог warn, breadcrumb в Sentry |
+| `system_error` | 500 | metric++, лог error, исключение в Sentry |
+| `slow_request` | 200 (через 2-5с) | metric++, spike гистограммы, лог warn |
+| `teapot` | 418 🫖 | signal: 42, пасхальное яйцо в метаданных |
 
-## Development
+## Разработка
 
 ```bash
-# Backend only (requires local PG)
+# Только бэкенд (требует локальный PG)
 cd apps/backend
 cp .env.example .env
 npm install
 npx prisma migrate dev
 npm run start:dev
 
-# Frontend only
+# Только фронтенд
 cd apps/frontend
 cp .env.example .env
 npm install
 npm run dev
 ```
 
-## AI Layer
+## Слой AI
 
-See [AI_LAYER.md](./AI_LAYER.md) for documentation on Cursor skills, rules, commands, and hooks.
+Смотри [AI_LAYER.md](./AI_LAYER.md) — документация по навыкам Cursor, правилам, командам и хукам.

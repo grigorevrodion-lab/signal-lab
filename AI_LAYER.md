@@ -1,77 +1,77 @@
-# Signal Lab — Cursor AI Layer
+# Signal Lab — Слой AI (Cursor)
 
-The AI layer turns this repository into an environment where a fresh Cursor chat can continue development without manual onboarding. Every convention, pattern, and workflow is encoded as a reusable artifact.
-
----
-
-## Rules (`.cursor/rules/`)
-
-| File | Scope | What it enforces |
-|------|-------|-----------------|
-| `01-stack-constraints.mdc` | `**/*.ts, **/*.tsx` | Forbidden/allowed libraries. No Redux, no SWR, no TypeORM, no raw SQL. Always applied. |
-| `02-observability-conventions.mdc` | `apps/backend/src/**` | Metric naming (snake_case, unit suffixes), pino log format (required fields), Sentry usage rules. |
-| `03-prisma-patterns.mdc` | `apps/backend/src/**, prisma/**` | Inject PrismaService via DI, no raw SQL, migration workflow, schema conventions (cuid IDs). |
-| `04-frontend-patterns.mdc` | `apps/frontend/src/**` | TanStack Query for server state, RHF + Zod for forms, shadcn/ui for components, no `useState` for remote data. |
-| `05-error-handling.mdc` | `**/*.ts, **/*.tsx` | NestJS HTTP exceptions, Sentry capture before rethrow, `logger.error({ err })`, no silent catches. |
-
-Rules don't conflict because they're scoped to different directories and concern orthogonal topics.
+Слой AI превращает этот репозиторий в среду, где свежий чат Cursor может продолжать разработку без ручного онбординга. Каждое соглашение, паттерн и рабочий процесс закодированы в виде переиспользуемых артефактов.
 
 ---
 
-## Custom Skills (`.cursor/skills/`)
+## Правила (`.cursor/rules/`)
+
+| Файл | Область | Что контролирует |
+|------|---------|-----------------|
+| `01-stack-constraints.mdc` | `**/*.ts, **/*.tsx` | Запрещённые/разрешённые библиотеки. Без Redux, SWR, TypeORM, чистого SQL. Применяется всегда. |
+| `02-observability-conventions.mdc` | `apps/backend/src/**` | Именование метрик (snake_case, суффиксы единиц), формат логов pino (обязательные поля), правила использования Sentry. |
+| `03-prisma-patterns.mdc` | `apps/backend/src/**, prisma/**` | Инъекция PrismaService через DI, без чистого SQL, рабочий процесс миграций, соглашения схемы (cuid ID). |
+| `04-frontend-patterns.mdc` | `apps/frontend/src/**` | TanStack Query для серверного состояния, RHF + Zod для форм, shadcn/ui для компонентов, без `useState` для удалённых данных. |
+| `05-error-handling.mdc` | `**/*.ts, **/*.tsx` | HTTP-исключения NestJS, захват Sentry перед повторным выбросом, `logger.error({ err })`, без тихих перехватов. |
+
+Правила не конфликтуют, так как привязаны к разным директориям и касаются ортогональных тем.
+
+---
+
+## Пользовательские навыки (`.cursor/skills/`)
 
 ### `add-observability`
-**When**: Adding any new backend endpoint or service method.
-**What**: Step-by-step guide to add prom-client metric counter + histogram, pino structured log with required fields, Sentry breadcrumb + captureException. Includes checklist to prevent forgetting any signal.
+**Когда**: Добавление нового эндпоинта бэкенда или метода сервиса.
+**Что**: Пошаговое руководство по добавлению счётчика метрик и гистограммы prom-client, структурированного лога pino с обязательными полями, breadcrumb + captureException для Sentry. Включает чеклист, чтобы ничего не забыть.
 
 ### `add-nestjs-endpoint`
-**When**: Creating a new domain resource (controller + service + DTO + module).
-**What**: Complete scaffolding templates with placeholder substitution. Wires observability automatically. Shows how to add to AppModule.
+**Когда**: Создание нового доменного ресурса (контроллер + сервис + DTO + модуль).
+**Что**: Полные шаблоны скаффолдинга с подстановкой плейсхолдеров. Автоматически подключает наблюдаемость. Показывает, как добавить в AppModule.
 
 ### `add-frontend-form`
-**When**: Adding a new form to the Next.js UI.
-**What**: Complete RHF + Zod + TanStack mutation template. Includes all patterns: zodResolver, isPending on button, onSuccess invalidation, onError toast.
+**Когда**: Добавление новой формы в Next.js UI.
+**Что**: Полный шаблон RHF + Zod + мутация TanStack. Включает все паттерны: zodResolver, isPending на кнопке, инвалидация onSuccess, тост onError.
 
 ### `signal-lab-orchestrator`
-**When**: Implementing a full PRD end-to-end via `/run-prd`.
-**What**: 7-phase pipeline (analysis → codebase-scan → planning → decomposition → implementation → review → report). Delegates 80% to fast models. Persists state in `.execution/<timestamp>/context.json`. Resume-safe after interruption.
+**Когда**: Реализация полного PRD end-to-end через `/run-prd`.
+**Что**: Конвейер из 7 фаз (анализ → сканирование кодовой базы → планирование → декомпозиция → реализация → ревью → отчёт). Делегирует 80% быстрым моделям. Сохраняет состояние в `.execution/<timestamp>/context.json`. Безопасное возобновление после прерывания.
 
 ---
 
-## Commands (`.cursor/commands/`)
+## Команды (`.cursor/commands/`)
 
-| Command | What it does |
-|---------|-------------|
-| `/add-endpoint` | Scaffolds a complete NestJS endpoint with observability in one shot |
-| `/check-obs` | Audits all services for missing metrics, logs, Sentry — outputs gap report |
-| `/run-prd <path>` | Runs the orchestrator on a PRD file, 7 phases, resume-safe |
-
----
-
-## Hooks (`.cursor/settings.json`)
-
-| Hook | Trigger | Problem it solves |
-|------|---------|-------------------|
-| `schema-change-reminder` | PostEdit on `prisma/schema.prisma` | Prevents the classic "schema changed but forgot to migrate" error — the single most common developer mistake with Prisma |
-| `new-endpoint-obs-check` | PostEdit on `**/*.controller.ts` | Reminds to verify observability is wired whenever a controller is touched — runs `/check-obs` suggestion |
-| `no-hardcoded-secrets` | PreCommit | Blocks commits with literal SENTRY_DSN values in source files |
-| `no-console-log` | PreCommit | Blocks backend `console.log` commits (use pino) |
+| Команда | Что делает |
+|---------|-----------|
+| `/add-endpoint` | Создаёт полный NestJS-эндпоинт с наблюдаемостью за один раз |
+| `/check-obs` | Проверяет все сервисы на отсутствующие метрики, логи, Sentry — выводит отчёт о пробелах |
+| `/run-prd <path>` | Запускает оркестратор на файле PRD, 7 фаз, безопасное возобновление |
 
 ---
 
-## Marketplace Skills
+## Хуки (`.cursor/settings.json`)
 
-| Skill | Why connected |
-|-------|--------------|
-| `nestjs-best-practices` | Provides NestJS module/DI/decorator patterns. Custom skills reference but don't duplicate it — they add observability on top. |
-| `prisma-orm` | Covers Prisma schema syntax, migrations, relation patterns. Custom rule 03 adds Signal Lab-specific constraints (cuid, Json metadata). |
-| `next-best-practices` | App Router patterns, Server/Client component split, metadata API. |
-| `shadcn-ui` | Component API, variant patterns, theming. Prevents re-inventing UI components. |
-| `tailwind-v4-shadcn` | TW utility patterns, dark mode, custom CSS variables as used in `globals.css`. |
-| `docker-expert` | Docker Compose, multi-stage Dockerfiles, health checks, volume mounts. |
-| `postgresql-table-design` | Index strategy, data type choices, normalization — consulted when extending Prisma schema. |
+| Хук | Триггер | Какую проблему решает |
+|-----|---------|----------------------|
+| `schema-change-reminder` | PostEdit на `prisma/schema.prisma` | Предотвращает классическую ошибку "схема изменена, но забыли мигрировать" — самая частая ошибка разработчиков с Prisma |
+| `new-endpoint-obs-check` | PostEdit на `**/*.controller.ts` | Напоминает проверить наблюдаемость при изменении контроллера — предлагает запустить `/check-obs` |
+| `no-hardcoded-secrets` | PreCommit | Блокирует коммиты с литеральными значениями SENTRY_DSN в исходных файлах |
+| `no-console-log` | PreCommit | Блокирует бэкенд-коммиты с `console.log` (используй pino) |
 
-**What custom skills add that marketplace doesn't cover:**
-- Observability wiring specific to Signal Lab's `metrics.registry.ts` + pino logger pattern
-- Signal Lab orchestrator for multi-PRD execution with context.json state
-- Project-specific conventions (scenario types, Loki labels, Sentry tags)
+---
+
+## Навыки маркетплейса
+
+| Навык | Зачем подключён |
+|-------|----------------|
+| `nestjs-best-practices` | Предоставляет паттерны NestJS модулей, DI и декораторов. Пользовательские навыки ссылаются, но не дублируют — добавляют поверх наблюдаемость. |
+| `prisma-orm` | Охватывает синтаксис схемы Prisma, миграции, паттерны связей. Правило 03 добавляет специфические для Signal Lab ограничения (cuid, Json metadata). |
+| `next-best-practices` | Паттерны App Router, разделение Server/Client компонентов, metadata API. |
+| `shadcn-ui` | API компонентов, паттерны вариантов, темизация. Предотвращает повторное изобретение UI-компонентов. |
+| `tailwind-v4-shadcn` | Утилиты TW, тёмная тема, кастомные CSS-переменные как в `globals.css`. |
+| `docker-expert` | Docker Compose, многоэтапные Dockerfile, проверки здоровья, монтирование томов. |
+| `postgresql-table-design` | Стратегия индексов, выбор типов данных, нормализация — консультируется при расширении схемы Prisma. |
+
+**Что добавляют пользовательские навыки сверх маркетплейса:**
+- Подключение наблюдаемости для конкретного паттерна `metrics.registry.ts` + pino logger Signal Lab
+- Оркестратор Signal Lab для выполнения нескольких PRD с состоянием в context.json
+- Специфические для проекта соглашения (типы сценариев, метки Loki, теги Sentry)

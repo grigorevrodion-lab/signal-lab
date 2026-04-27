@@ -1,159 +1,159 @@
-# Signal Lab — Submission Checklist
+# Signal Lab — Чеклист сдачи
 
 ---
 
-## Repository
+## Репозиторий
 
 - **URL**: `https://github.com/<your-username>/signal-lab`
-- **Branch**: `main`
-- **Time worked**: ~8 hours
+- **Ветка**: `main`
+- **Затрачено времени**: ~8 часов
 
-**Started**: [fill in time]
-**Completed**: [fill in time]
+**Начало**: [указать время]
+**Завершение**: [указать время]
 
 ---
 
-## Launch
+## Запуск
 
 ```bash
-# Start everything:
+# Запустить всё:
 docker compose up -d
 
-# Verify health:
+# Проверить состояние:
 docker compose ps
 
-# Stop:
+# Остановить:
 docker compose down
 
-# Stop + remove data:
+# Остановить + удалить данные:
 docker compose down -v
 ```
 
-**Prerequisites**: Docker Desktop 4.x+ with Compose v2, Git. No Node.js required to run.
+**Требования**: Docker Desktop 4.x+ с Compose v2, Git. Node.js для запуска не нужен.
 
 ---
 
-## Stack — Confirmation
+## Стек — подтверждение
 
-| Technology | Used? | Where to look |
-|-----------|:------:|---------------|
+| Технология | Используется? | Где смотреть |
+|-----------|:------------:|--------------|
 | Next.js (App Router) | ✅ | `apps/frontend/src/app/` — layout.tsx, page.tsx |
 | shadcn/ui | ✅ | `apps/frontend/src/components/ui/` — button, badge, card, input, select |
 | Tailwind CSS | ✅ | `apps/frontend/tailwind.config.ts`, `globals.css` |
 | TanStack Query | ✅ | `run-history.tsx` (useQuery), `scenario-runner.tsx` (useMutation) |
 | React Hook Form | ✅ | `scenario-runner.tsx` — useForm + zodResolver |
-| NestJS | ✅ | `apps/backend/src/` — modules, controllers, services |
-| PostgreSQL | ✅ | `docker-compose.yml` postgres service |
+| NestJS | ✅ | `apps/backend/src/` — модули, контроллеры, сервисы |
+| PostgreSQL | ✅ | сервис postgres в `docker-compose.yml` |
 | Prisma | ✅ | `apps/backend/prisma/schema.prisma`, PrismaService |
 | Sentry | ✅ | `scenario.service.ts` — captureException, addBreadcrumb |
-| Prometheus | ✅ | `metrics.registry.ts` — 3 metrics, exposed at GET /metrics |
-| Grafana | ✅ | `monitoring/grafana/dashboards/signal-lab.json` — 5 panels, provisioned |
-| Loki | ✅ | `docker-compose.yml`, Promtail ships backend logs |
+| Prometheus | ✅ | `metrics.registry.ts` — 3 метрики, доступны на GET /metrics |
+| Grafana | ✅ | `monitoring/grafana/dashboards/signal-lab.json` — 5 панелей, авто-провижининг |
+| Loki | ✅ | `docker-compose.yml`, Promtail передаёт логи бэкенда |
 
 ---
 
-## Observability Verification
+## Проверка наблюдаемости
 
-| Signal | How to reproduce | Where to see result |
-|--------|-----------------|---------------------|
-| Prometheus metric | Run any scenario in UI | `http://localhost:3001/metrics` → search `scenario_runs_total` |
-| Grafana dashboard | Run several scenarios, wait 15s | `http://localhost:3100` → Signal Lab dashboard |
-| Loki log | Run any scenario | Grafana → Explore → Loki → `{app="signal-lab"}` |
-| Sentry exception | Run `system_error` scenario (requires SENTRY_DSN) | Sentry project dashboard |
-
----
-
-## Cursor AI Layer
-
-### Custom Skills
-
-| # | Skill name | Purpose |
-|---|-----------|---------|
-| 1 | `add-observability` | Step-by-step guide for adding metrics + logging + Sentry to any endpoint |
-| 2 | `add-nestjs-endpoint` | Scaffolding template for NestJS controller/service/DTO/module |
-| 3 | `add-frontend-form` | RHF + Zod + TanStack mutation complete template |
-| 4 | `signal-lab-orchestrator` | 7-phase PRD executor with context.json state and resume support |
-
-### Commands
-
-| # | Command | What it does |
-|---|---------|-------------|
-| 1 | `/add-endpoint` | Scaffold new NestJS endpoint with observability in one prompt |
-| 2 | `/check-obs` | Audit all services for missing metrics/logs/Sentry |
-| 3 | `/run-prd <path>` | Execute PRD via orchestrator pipeline |
-
-### Hooks
-
-| # | Hook | Problem it solves |
-|---|------|-----------------|
-| 1 | `schema-change-reminder` (PostEdit: schema.prisma) | Blocks "forgot to migrate" mistake — most common Prisma pitfall |
-| 2 | `new-endpoint-obs-check` (PostEdit: *.controller.ts) | Reminds to run /check-obs after touching a controller |
-| 3 | `no-hardcoded-secrets` (PreCommit) | Catches hardcoded SENTRY_DSN before it hits the repo |
-| 4 | `no-console-log` (PreCommit) | Enforces pino logger over console.log in backend |
-
-### Rules
-
-| # | Rule file | What it fixes |
-|---|----------|--------------|
-| 1 | `01-stack-constraints.mdc` | Prevents adding Redux, SWR, TypeORM, raw SQL |
-| 2 | `02-observability-conventions.mdc` | Enforces metric naming, log format, Sentry usage |
-| 3 | `03-prisma-patterns.mdc` | Enforces PrismaService DI, migration workflow |
-| 4 | `04-frontend-patterns.mdc` | TanStack Query for server state, no useState for remote data |
-| 5 | `05-error-handling.mdc` | NestJS exceptions, Sentry capture, no silent catches |
-
-### Marketplace Skills
-
-| # | Skill | Why connected |
-|---|-------|--------------|
-| 1 | `nestjs-best-practices` | NestJS DI, decorators, module architecture |
-| 2 | `prisma-orm` | Schema syntax, migrations, query API |
-| 3 | `next-best-practices` | App Router, Server/Client component split |
-| 4 | `shadcn-ui` | Component API, variant system, theming |
-| 5 | `tailwind-v4-shadcn` | Tailwind utilities, CSS custom properties |
-| 6 | `docker-expert` | Compose patterns, health checks, volumes |
-| 7 | `postgresql-table-design` | Index strategy for ScenarioRun queries |
-
-**What custom skills add that marketplace doesn't have:**
-- Signal Lab-specific `metrics.registry.ts` + pino logger wiring pattern
-- Orchestrator with 7-phase pipeline and context.json state persistence
-- Project-specific observability checklist tied to the actual codebase
+| Сигнал | Как воспроизвести | Где смотреть результат |
+|--------|-----------------|------------------------|
+| Метрика Prometheus | Запустить любой сценарий в UI | `http://localhost:3001/metrics` → найти `scenario_runs_total` |
+| Дашборд Grafana | Запустить несколько сценариев, подождать 15с | `http://localhost:3100` → дашборд Signal Lab |
+| Лог Loki | Запустить любой сценарий | Grafana → Explore → Loki → `{app="signal-lab"}` |
+| Исключение Sentry | Запустить сценарий `system_error` (требует SENTRY_DSN) | Панель проекта Sentry |
 
 ---
 
-## Orchestrator
+## Слой AI Cursor
 
-- **Path to skill**: `.cursor/skills/signal-lab-orchestrator/SKILL.md`
-- **Context file location**: `.execution/<timestamp>/context.json`
-- **Phases**: 7 (analysis → codebase-scan → planning → decomposition → implementation → review → report)
-- **Fast model tasks**: schema fields, DTOs, simple endpoints, metric additions, UI components (~80%)
-- **Default model tasks**: architecture planning, complex integrations, cross-cutting review (~20%)
-- **Supports resume**: yes — reads `currentPhase` from context.json on restart
+### Пользовательские навыки
+
+| # | Название навыка | Назначение |
+|---|----------------|-----------|
+| 1 | `add-observability` | Пошаговое руководство по добавлению метрик + логирования + Sentry в любой эндпоинт |
+| 2 | `add-nestjs-endpoint` | Шаблон скаффолдинга контроллера/сервиса/DTO/модуля NestJS |
+| 3 | `add-frontend-form` | Полный шаблон RHF + Zod + мутация TanStack |
+| 4 | `signal-lab-orchestrator` | Исполнитель PRD из 7 фаз с состоянием context.json и поддержкой возобновления |
+
+### Команды
+
+| # | Команда | Что делает |
+|---|---------|-----------|
+| 1 | `/add-endpoint` | Создаёт новый NestJS-эндпоинт с наблюдаемостью за один промпт |
+| 2 | `/check-obs` | Проверяет все сервисы на отсутствующие метрики/логи/Sentry |
+| 3 | `/run-prd <path>` | Выполняет PRD через конвейер оркестратора |
+
+### Хуки
+
+| # | Хук | Какую проблему решает |
+|---|-----|----------------------|
+| 1 | `schema-change-reminder` (PostEdit: schema.prisma) | Блокирует ошибку "забыл мигрировать" — самая частая ловушка Prisma |
+| 2 | `new-endpoint-obs-check` (PostEdit: *.controller.ts) | Напоминает запустить /check-obs после изменения контроллера |
+| 3 | `no-hardcoded-secrets` (PreCommit) | Перехватывает хардкод SENTRY_DSN до попадания в репозиторий |
+| 4 | `no-console-log` (PreCommit) | Требует pino-логгер вместо console.log на бэкенде |
+
+### Правила
+
+| # | Файл правила | Что исправляет |
+|---|-------------|---------------|
+| 1 | `01-stack-constraints.mdc` | Запрещает добавление Redux, SWR, TypeORM, чистого SQL |
+| 2 | `02-observability-conventions.mdc` | Обязывает именовать метрики, соблюдать формат логов и правила Sentry |
+| 3 | `03-prisma-patterns.mdc` | Требует DI PrismaService, рабочий процесс миграций |
+| 4 | `04-frontend-patterns.mdc` | TanStack Query для серверного состояния, без useState для удалённых данных |
+| 5 | `05-error-handling.mdc` | Исключения NestJS, захват Sentry, без тихих перехватов |
+
+### Навыки маркетплейса
+
+| # | Навык | Зачем подключён |
+|---|-------|----------------|
+| 1 | `nestjs-best-practices` | DI NestJS, декораторы, архитектура модулей |
+| 2 | `prisma-orm` | Синтаксис схемы, миграции, API запросов |
+| 3 | `next-best-practices` | App Router, разделение Server/Client компонентов |
+| 4 | `shadcn-ui` | API компонентов, система вариантов, темизация |
+| 5 | `tailwind-v4-shadcn` | Утилиты Tailwind, кастомные CSS-свойства |
+| 6 | `docker-expert` | Паттерны Compose, проверки здоровья, тома |
+| 7 | `postgresql-table-design` | Стратегия индексов для запросов ScenarioRun |
+
+**Что добавляют пользовательские навыки сверх маркетплейса:**
+- Специфический для Signal Lab паттерн подключения `metrics.registry.ts` + pino logger
+- Оркестратор с конвейером из 7 фаз и сохранением состояния в context.json
+- Чеклист наблюдаемости, привязанный к реальной кодовой базе
 
 ---
 
-## What I'd Add with +4 Hours
+## Оркестратор
 
-1. **Tests** — Jest integration tests for scenario service with real DB (testcontainers)
-2. **Auth** — Bearer token for the API, logged in audit trail
-3. **Alerting** — Grafana alert rule firing when error rate > 10% for 5min
-4. **Seed** — `prisma db seed` with 20 sample runs for immediate Grafana gratification
-5. **E2E** — Playwright test: run scenario → verify badge appears in history
+- **Путь к навыку**: `.cursor/skills/signal-lab-orchestrator/SKILL.md`
+- **Расположение файла контекста**: `.execution/<timestamp>/context.json`
+- **Фазы**: 7 (анализ → сканирование кодовой базы → планирование → декомпозиция → реализация → ревью → отчёт)
+- **Задачи быстрой модели**: поля схемы, DTO, простые эндпоинты, добавление метрик, UI-компоненты (~80%)
+- **Задачи основной модели**: архитектурное планирование, сложные интеграции, сквозное ревью (~20%)
+- **Поддерживает возобновление**: да — читает `currentPhase` из context.json при перезапуске
 
 ---
 
-## Questions for Defence (Prepared Answers)
+## Что добавил бы ещё при +4 часах
 
-**1. Why this decomposition of skills?**
-Each skill maps to one recurring workflow: adding observability (daily), scaffolding endpoints (weekly), building forms (weekly), executing PRDs (per sprint). They're sized to be self-contained — the observability skill has a checklist so no step is forgotten.
+1. **Тесты** — Jest-интеграционные тесты для сервиса сценариев с реальной БД (testcontainers)
+2. **Авторизация** — Bearer-токен для API, журнал аудита
+3. **Алертинг** — правило алерта Grafana при error rate > 10% в течение 5 минут
+4. **Seed** — `prisma db seed` с 20 примерами запусков для мгновенного результата в Grafana
+5. **E2E** — тест Playwright: запустить сценарий → проверить, что бейдж появился в истории
 
-**2. Which tasks go to fast model?**
-Mechanical tasks with a clear spec: add a field, create a DTO, add a metric line, create a CRUD endpoint. The spec is in the prompt — the model just fills in the blanks. Fast = low creativity required, high structure provided.
+---
 
-**3. Marketplace vs custom skills?**
-Marketplace covers framework syntax (NestJS DI, Prisma queries). Custom covers Signal Lab specifics: how metrics are registered, which pino fields are required, how the orchestrator state machine works. No duplication.
+## Вопросы к защите (подготовленные ответы)
 
-**4. Which hooks reduce real errors?**
-The `schema-change-reminder` hook catches the #1 Prisma developer mistake. The `no-hardcoded-secrets` PreCommit hook stops secret leaks at the source.
+**1. Почему такая декомпозиция навыков?**
+Каждый навык соответствует одному повторяющемуся рабочему процессу: добавление наблюдаемости (ежедневно), скаффолдинг эндпоинтов (еженедельно), создание форм (еженедельно), выполнение PRD (раз в спринт). Каждый самодостаточен — в навыке наблюдаемости есть чеклист, чтобы ни один шаг не был пропущен.
 
-**5. How does orchestrator save context?**
-Main chat: reads context.json (~2k tokens), writes subagent prompt (~1k tokens), reads result (~1k tokens). Total per task: ~4k tokens. A 12-task PRD costs ~48k tokens in the main chat vs ~500k+ if done in one prompt.
+**2. Какие задачи идут в быструю модель?**
+Механические задачи с чётким описанием: добавить поле, создать DTO, добавить строку метрики, создать CRUD-эндпоинт. Описание в промпте — модель просто заполняет заготовку. Быстрая модель = низкая потребность в творчестве, высокая структурированность задачи.
+
+**3. Маркетплейс vs пользовательские навыки?**
+Маркетплейс покрывает синтаксис фреймворков (DI NestJS, запросы Prisma). Пользовательские — специфику Signal Lab: как регистрируются метрики, какие поля pino обязательны, как работает машина состояний оркестратора. Дублирования нет.
+
+**4. Какие хуки снижают реальные ошибки?**
+Хук `schema-change-reminder` ловит ошибку №1 разработчиков с Prisma. Хук `no-hardcoded-secrets` PreCommit останавливает утечку секретов у источника.
+
+**5. Как оркестратор сохраняет контекст?**
+Основной чат: читает context.json (~2k токенов), пишет промпт подагента (~1k токенов), читает результат (~1k токенов). Итого на задачу: ~4k токенов. PRD из 12 задач обходится ~48k токенов в основном чате против ~500k+, если всё делать в одном промпте.
